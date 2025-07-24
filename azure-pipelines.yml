@@ -17,13 +17,13 @@ stages:
   jobs:
   - job: PRCheck
     steps:
-    - script: echo "Validating PR targeting master"
-      displayName: 'PR Check'
+    - script: echo "Validating pull request targeting master"
+      displayName: 'PR Check Step'
 
 - stage: Deploy
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - job: DeployJob
     steps:
-    - script: echo "Deploying: master branch was updated via push or PR merge"
+    - script: echo "Deploying because master was updated directly"
       displayName: 'Deploy Step'
