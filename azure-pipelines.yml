@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include:
+      - master
+
+pr:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: ValidatePR
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - job: PRCheck
+    steps:
+    - script: echo "Validating pull request targeting master"
+      displayName: 'PR Check Step'
+
+- stage: Deploy
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - job: DeployJob
+    steps:
+    - script: echo "Deploying because master was updated directly"
+      displayName: 'Deploy Step'
