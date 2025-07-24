@@ -1,53 +1,11 @@
-trigger:
-  branches:
-    include:
-      - '*'
-
 pr:
   branches:
     include:
       - master
-      - develop
-      - release/*
 
-variables:
-  buildBranch: $(Build.SourceBranch)
-  buildVersion: '1.0.$(Build.BuildId)'
+pool:
+  vmImage: 'ubuntu-latest'
 
-stages:
-- stage: Build
-  displayName: 'Build & Package PR'
-  condition: startsWith(variables['buildBranch'], 'refs/pull/')
-  jobs:
-  - job: BuildPR
-    steps:
-    - script: echo "🔍 Branch: $(buildBranch)"
-      displayName: 'Debug Branch Ref'
-
-    - script: echo "Building code from PR..."
-      displayName: 'Build PR'
-
-    - script: |
-        echo "Packaging artifacts..."
-        mkdir drop
-        echo "$(buildVersion)" > drop/version.txt
-      displayName: 'Package Artifacts'
-
-    - publish: drop
-      artifact: buildOutput
-
-- stage: Deploy
-  displayName: 'Deploy After Merge'
-  dependsOn: Build
-  condition: startsWith(variables['buildBranch'], 'refs/heads/master')
-  jobs:
-  - job: DeployJob
-    steps:
-    - download: current
-      artifact: buildOutput
-
-    - script: echo "Deploying version $(buildVersion)..."
-      displayName: 'Deploy Artifact'
-
-    - script: echo "Tagging release v$(buildVersion)..."
-      displayName: 'Tag Release'
+steps:
+- script: echo "This pipeline ran because a PR was created or updated targeting master."
+  displayName: 'PR Validation Step'
