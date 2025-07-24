@@ -1,16 +1,18 @@
 trigger:
   branches:
     include:
-      - master
+      - '*'
 
 pr:
   branches:
     include:
       - master
+      - develop
+      - release/*
 
 variables:
-  buildVersion: '1.0.$(Build.BuildId)'
   buildBranch: $(Build.SourceBranch)
+  buildVersion: '1.0.$(Build.BuildId)'
 
 stages:
 - stage: Build
@@ -18,7 +20,6 @@ stages:
   condition: startsWith(variables['buildBranch'], 'refs/pull/')
   jobs:
   - job: BuildPR
-    displayName: 'Validate PR Build'
     steps:
     - script: echo "🔍 Branch: $(buildBranch)"
       displayName: 'Debug Branch Ref'
@@ -36,7 +37,7 @@ stages:
       artifact: buildOutput
 
 - stage: Deploy
-  displayName: 'Deploy Merged PR to Main'
+  displayName: 'Deploy After Merge'
   dependsOn: Build
   condition: startsWith(variables['buildBranch'], 'refs/heads/master')
   jobs:
@@ -45,8 +46,8 @@ stages:
     - download: current
       artifact: buildOutput
 
-    - script: echo "Deploying build version $(buildVersion) from $(buildBranch)..."
-      displayName: 'Deploy Build'
+    - script: echo "Deploying version $(buildVersion)..."
+      displayName: 'Deploy Artifact'
 
     - script: echo "Tagging release v$(buildVersion)..."
       displayName: 'Tag Release'
