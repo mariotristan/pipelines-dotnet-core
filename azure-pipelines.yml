@@ -21,7 +21,7 @@ stages:
       displayName: 'PR Check Step'
 
 - stage: Deploy
-  condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.Reason'], 'PullRequest'))
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   jobs:
   - job: DeployJob
     steps:
