@@ -10,18 +10,22 @@ pr:
 
 variables:
   buildVersion: '1.0.$(Build.BuildId)'
+  buildBranch: $(Build.SourceBranch)
 
 stages:
 - stage: Build
-  displayName: 'Build & Package'
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/pull/')
+  displayName: 'Build & Package PR'
+  condition: startsWith(variables['buildBranch'], 'refs/pull/')
   jobs:
   - job: BuildPR
     displayName: 'Validate PR Build'
     steps:
-    - script: echo "Building PR code..."
+    - script: echo "🔍 Branch: $(buildBranch)"
+      displayName: 'Debug Branch Ref'
+
+    - script: echo "Building code from PR..."
       displayName: 'Build PR'
-    
+
     - script: |
         echo "Packaging artifacts..."
         mkdir drop
@@ -32,13 +36,17 @@ stages:
       artifact: buildOutput
 
 - stage: Deploy
-  displayName: 'Deploy Post-Merge'
+  displayName: 'Deploy Merged PR to Main'
   dependsOn: Build
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+  condition: startsWith(variables['buildBranch'], 'refs/heads/main')
   jobs:
   - job: DeployJob
     steps:
     - download: current
       artifact: buildOutput
 
-    - script: echo "Deploying version $(buildVersion)...
+    - script: echo "Deploying build version $(buildVersion) from $(buildBranch)..."
+      displayName: 'Deploy Build'
+
+    - script: echo "Tagging release v$(buildVersion)..."
+      displayName: 'Tag Release'
