@@ -12,12 +12,12 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- stage: ValidatePR
+- stage: Build
   condition: eq(variables['Build.Reason'], 'PullRequest')
   jobs:
-  - job: PRCheck
+  - job: BuildJob
     steps:
-    - script: echo "Validating pull request targeting master"
+    - script: echo "Aqui debe correr tu build, pero solo se ejecuta si viene de un PR hacia master"
       displayName: 'PR Check Step'
 
 - stage: Deploy
@@ -25,5 +25,5 @@ stages:
   jobs:
   - job: DeployJob
     steps:
-    - script: echo "Deploying because master was updated directly"
+    - script: echo "aqui debe correr tu deploy por que se actualizo master, los demas branches se ignoran para deploy"
       displayName: 'Deploy Step'
